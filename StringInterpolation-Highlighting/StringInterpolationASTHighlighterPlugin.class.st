@@ -1,9 +1,6 @@
 Class {
 	#name : #StringInterpolationASTHighlighterPlugin,
-	#superclass : #Object,
-	#instVars : [
-		'ast'
-	],
+	#superclass : #OCCompilerASTPlugin,
 	#category : #'StringInterpolation-Highlighting'
 }
 
@@ -15,6 +12,11 @@ StringInterpolationASTHighlighterPlugin class >> ast: aRBMethodNode [
 		yourself
 ]
 
+{ #category : #private }
+StringInterpolationASTHighlighterPlugin class >> priority [
+	^ 0
+]
+
 { #category : #transforming }
 StringInterpolationASTHighlighterPlugin class >> transform [
 	self shouldBeImplemented.
@@ -24,11 +26,6 @@ StringInterpolationASTHighlighterPlugin class >> transform [
 StringInterpolationASTHighlighterPlugin class >> transform: ast [
 
 	(self ast: ast) transform
-]
-
-{ #category : #accessing }
-StringInterpolationASTHighlighterPlugin >> ast: aRBMethodNode [ 
-	ast := aRBMethodNode
 ]
 
 { #category : #transforming }
