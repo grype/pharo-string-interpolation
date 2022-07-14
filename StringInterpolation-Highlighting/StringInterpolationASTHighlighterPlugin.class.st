@@ -25,7 +25,7 @@ StringInterpolationASTHighlighterPlugin class >> transform [
 { #category : #transforming }
 StringInterpolationASTHighlighterPlugin class >> transform: ast [
 
-	(self ast: ast) transform
+	^ (self ast: ast) transform
 ]
 
 { #category : #transforming }
