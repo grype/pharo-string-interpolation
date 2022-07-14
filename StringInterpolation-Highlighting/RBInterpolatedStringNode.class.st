@@ -52,3 +52,8 @@ RBInterpolatedStringNode >> stringNode: aRBLiteralValueNode [
 	
 	stringNode := aRBLiteralValueNode
 ]
+
+{ #category : #accessing }
+RBInterpolatedStringNode >> value [ 
+	^ stringNode value
+]
