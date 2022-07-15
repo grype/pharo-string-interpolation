@@ -14,6 +14,15 @@ StringInterpolationASTStructureTest >> interpolationNode [
 	^ ast statements first
 ]
 
+{ #category : #running }
+StringInterpolationASTStructureTest >> setUp [
+
+	super setUp.
+	sourceCode := 'methodHeader ''{1*1}'''.
+	ast := RBParser parseMethod: sourceCode.
+	ast := (StringInterpolationASTHighlighterPlugin ast: ast) transform.
+]
+
 { #category : #tests }
 StringInterpolationASTStructureTest >> testASTHasStringInterpolationNode [
 	
