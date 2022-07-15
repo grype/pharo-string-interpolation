@@ -5,22 +5,13 @@ Class {
 		'ast',
 		'sourceCode'
 	],
-	#category : #'StringInterpolation-Highlighting'
+	#category : #'StringInterpolation-Highlighting-Tests'
 }
 
 { #category : #tests }
 StringInterpolationASTStructureTest >> interpolationNode [
 
 	^ ast statements first
-]
-
-{ #category : #tests }
-StringInterpolationASTStructureTest >> setUp [
-
-	super setUp.
-	sourceCode := 'methodHeader ''{1*1}'''.
-	ast := RBParser parseMethod: sourceCode.
-	ast := (StringInterpolationASTHighlighterPlugin ast: ast) transform.
 ]
 
 { #category : #tests }

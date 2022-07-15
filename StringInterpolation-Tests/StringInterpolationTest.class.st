@@ -1,7 +1,7 @@
 Class {
 	#name : #StringInterpolationTest,
 	#superclass : #TestCase,
-	#category : #StringInterpolation
+	#category : #'StringInterpolation-Tests'
 }
 
 { #category : #compiler }
