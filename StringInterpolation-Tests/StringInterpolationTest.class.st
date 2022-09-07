@@ -75,3 +75,10 @@ StringInterpolationTest >> testInterpolateVariable [
 	variable := 2.
 	self assert: '1+1 is \[variable]' equals: '1+1 is 2'
 ]
+
+{ #category : #tests }
+StringInterpolationTest >> testWithFormat [
+	self
+		assert: ('{1} + {2} is \[1 + 2]' format: { 1. 2 })
+		equals: '1 + 2 is 3'
+]
