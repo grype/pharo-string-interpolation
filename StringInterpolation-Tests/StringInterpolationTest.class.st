@@ -6,8 +6,9 @@ Class {
 
 { #category : #compiler }
 StringInterpolationTest class >> compiler [
-
-	^super compiler addPlugin: StringInterpolationPlugin
+	^ super compiler
+		  addPlugin: StringInterpolationPlugin;
+		  yourself
 ]
 
 { #category : #compiler }
@@ -19,23 +20,25 @@ StringInterpolationTest class >> highlighter [
 
 { #category : #tests }
 StringInterpolationTest >> testExpressionRaisingExceptionFailsAtRuntime [
+	| ok |
 
-	[ '{self error: ''example error''}' ]
+	ok := false.
+	[ '\[self error: ''example error'']' ]
 		on: Error
-		do: [ :error | 
-			self assert: error messageText equals: 'example error' ]
+		do: [ :error | ok := error messageText = 'example error' ].
+	self assert: ok equals: true
 ]
 
 { #category : #tests }
 StringInterpolationTest >> testInterpolateExpression [
 
-	self assert: '1+1 is {1 + 1}' equals: '1+1 is 2'
+	self assert: '1+1 is \[1 + 1]' equals: '1+1 is 2'
 ]
 
 { #category : #tests }
 StringInterpolationTest >> testInterpolateExpressionCallsAsString [
 
-	self assert: 'self asString is {self}' equals: 'self asString is ', self asString  
+	self assert: 'self asString is \[self asString]' equals: 'self asString is ', self asString
 ]
 
 { #category : #tests }
@@ -43,29 +46,26 @@ StringInterpolationTest >> testInterpolateExpressionMixingContextWithConstants [
 
 	| variable |
 	variable := 2.
-	self assert: '1 + variable is {1 + variable}' equals: '1 + variable is 3'
+	self assert: '1 + variable is \[1 + variable]' equals: '1 + variable is 3'
 ]
 
 { #category : #tests }
 StringInterpolationTest >> testInterpolateFailingExpressionThrowsSyntaxError [
-
 	self
-		should: [ self class compiler evaluate: ('''1+1 is \{1*}''' reject: [ :c | c = $\ ]) ]
+		should: [ self class compiler evaluate: '''1+1 is \' , '[1*]''' ]
 		raise: SyntaxErrorNotification
 ]
 
 { #category : #tests }
 StringInterpolationTest >> testInterpolateStringSyntaxErrorHasStartAtTheBeginningOfTheFailingExpression [
+	| ok str |
 
-	| stringToEvaluate |
-	stringToEvaluate := '''1+1 is \{1*}''' reject: [ :c | c = $\ ].
-	[
-		self class compiler evaluate: stringToEvaluate.
-		
-		"Fail if the evaluation did not raise syntax error"
-		self fail ]
-	on: SyntaxErrorNotification
-	do: [ :error | self assert: error location equals: (stringToEvaluate indexOf: ${) ]
+	ok := false.
+	str := '''1+1 is \' , '[1*]'''.
+	[ self class compiler evaluate: str ]
+		on: SyntaxErrorNotification
+		do: [ :err | ok := err location = ((str indexOf: $\) + 1) ]. "+1 to account leading quote."
+	self assert: ok equals: true
 ]
 
 { #category : #tests }
@@ -73,5 +73,5 @@ StringInterpolationTest >> testInterpolateVariable [
 
 	| variable |
 	variable := 2.
-	self assert: '1+1 is {variable}' equals: '1+1 is 2'
+	self assert: '1+1 is \[variable]' equals: '1+1 is 2'
 ]
