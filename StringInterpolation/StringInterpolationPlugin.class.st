@@ -61,39 +61,15 @@ StringInterpolationPlugin >> extractStatementsFrom: aLiteralValueNode [
 	[ stream atEnd ] whileFalse: [ 
 		| currentToken |
 
-		((currentToken := stream next) == $\ and: [ 
-			 stream atEnd not and: [ stream peek == $[ ] ]) ifTrue: [ 
-			| expression expressionPosition blockNode |
+		currentToken := stream next.
 
-			expressionPosition := stream position.
-			expression := stream upTo: $].
-			expression := expression , { stream peekBack }.
-			blockNode := nil.
-			[ 
-			[ blockNode := RBParser parseExpression: expression ]
-				on: SyntaxErrorNotification
-				do: [ 
-					stream atEnd
-						ifTrue: [ 
-							SyntaxErrorNotification
-								inClass: Object
-								withCode: ast sourceCode
-								doitFlag: false
-								errorMessage: 'Invalid syntax in pattern'
-								location: expressionPosition + aLiteralValueNode start + 1 ]
-						ifFalse: [ 
-						expression := expression , (stream upTo: $])
-						              , { stream peekBack } ] ] ] doWhileTrue: [ 
-				blockNode isNil or: [ (blockNode isKindOf: RBBlockNode) not ] ].
+		(currentToken == $\ and: [ 
+			 stream position > 1 and: [ (stream peekBack: 2) first == $\ ] ])
+			ifFalse: [ 
+				(stream atEnd not and: [ stream peek == $[ ]) ifTrue: [ 
+					(self nextNodeInStream: stream ofNode: aLiteralValueNode) 
+						ifNotNil: [ :aNode | messages add: aNode ] ] ] ].
 
-			messages add: (RBMessageNode
-					 receiver: (RBMessageNode
-							  receiver: (RBLiteralNode value: expressionPosition - 1)
-							  selector: #@
-							  arguments: { (RBLiteralNode value: stream position) })
-					 selector: #->
-					 arguments:
-					 { (RBMessageNode receiver: blockNode selector: #value) }) ] ].
 	^ messages
 ]
 
@@ -101,7 +77,42 @@ StringInterpolationPlugin >> extractStatementsFrom: aLiteralValueNode [
 StringInterpolationPlugin >> hasInterpolationPattern: aString [ 
 	
 	"Any string with \[ and ] in it is a potential interpolation target"
-	^ aString matchesRegex: '.*\\\[.*\].*'
+	^ aString matchesRegex: '^.*\\\[.*\].*$'
+]
+
+{ #category : #scanning }
+StringInterpolationPlugin >> nextNodeInStream: stream ofNode: aLiteralValueNode [
+	| expression expressionPosition blockNode messages |
+
+	messages := OrderedCollection new.
+	expressionPosition := stream position.
+	expression := stream upTo: $].
+	expression := expression , { stream peekBack }.
+	blockNode := nil.
+	[ 
+	[ blockNode := RBParser parseExpression: expression ]
+		on: SyntaxErrorNotification
+		do: [ :error | 
+			stream atEnd
+				ifTrue: [ 
+					SyntaxErrorNotification
+						inClass: Object
+						withCode: ast sourceCode
+						doitFlag: error doitFlag
+						errorMessage: 'Invalid syntax in pattern'
+						location: expressionPosition + aLiteralValueNode start + 1 ]
+				ifFalse: [ 
+				expression := expression , (stream upTo: $]) , { stream peekBack } ] ] ] 
+		doWhileTrue: [ 
+		blockNode isNil or: [ blockNode isBlock not ] ].
+	
+	^ RBMessageNode
+		receiver: (RBMessageNode
+				 receiver: (RBLiteralNode value: expressionPosition - 1)
+				 selector: #@
+				 arguments: { (RBLiteralNode value: stream position) })
+		selector: #->
+		arguments: { (RBMessageNode receiver: blockNode selector: #value) }
 ]
 
 { #category : #api }
