@@ -30,20 +30,30 @@ StringInterpolationPlugin class >> priority [
 ]
 
 { #category : #transforming }
-StringInterpolationPlugin >> expandStringLiteral: aRBLiteralValueNode [ 
-	
-	| newMessageNode |
-	(self hasInterpolationPattern: aRBLiteralValueNode value)
-		ifFalse: [ ^ self ].
+StringInterpolationPlugin >> expandStringLiteral: aRBLiteralValueNode [
+	| newMessageNode statements |
 
-	newMessageNode := 	RBMessageNode
-		receiver: (RBVariableNode named: self class name)
-		selector: #interpolate:withAssociations:
-		arguments: {
-			RBLiteralValueNode value: aRBLiteralValueNode value.
-			RBArrayNode statements: (self extractStatementsFrom: aRBLiteralValueNode)}.
-	aRBLiteralValueNode replaceWith: newMessageNode.
-	
+	(self hasInterpolationPattern: aRBLiteralValueNode value) ifFalse: [ 
+		^ self ].
+
+	statements := self extractStatementsFrom: aRBLiteralValueNode.
+	newMessageNode := aRBLiteralValueNode.
+
+	statements
+		ifEmpty: [ 
+			newMessageNode := RBLiteralNode value: (aRBLiteralValueNode value
+					                   copyWithRegex: '\\\\\['
+					                   matchesReplacedWith: '\[') ]
+		ifNotEmpty: [ 
+			newMessageNode := RBMessageNode
+				                  receiver:
+				                  (RBVariableNode named: self class name)
+				                  selector: #interpolate:withAssociations:
+				                  arguments: { 
+						                  (RBLiteralValueNode value:
+							                   aRBLiteralValueNode value).
+						                  (RBArrayNode statements: statements) } ].
+	aRBLiteralValueNode replaceWith: newMessageNode
 ]
 
 { #category : #extracting }
