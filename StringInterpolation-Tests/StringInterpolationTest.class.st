@@ -18,6 +18,21 @@ StringInterpolationTest class >> highlighter [
 		addPlugin: StringInterpolationASTHighlighterPlugin
 ]
 
+{ #category : #compiler }
+StringInterpolationTest class >> recompileAllTestMethods [
+	<script>
+	self methods
+		select: [ :meth | meth selector beginsWith: 'test' ]
+		thenDo: [ :meth | meth recompile ]
+]
+
+{ #category : #tests }
+StringInterpolationTest >> testEscapedExpression [
+	self
+		assert: '1+2 is \\[1 + 2]'
+		equals: '1+2 is \' , '[1 + 2]'
+]
+
 { #category : #tests }
 StringInterpolationTest >> testExpressionRaisingExceptionFailsAtRuntime [
 	| ok |
