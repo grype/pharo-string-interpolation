@@ -32,7 +32,7 @@ StringInterpolationASTHighlighterPlugin class >> transform: ast [
 StringInterpolationASTHighlighterPlugin >> expandStringLiteral: aRBLiteralValueNode [
 	
 	| interpolatedStringNode |
-	(StringInterpolationPlugin new hasInterpolationPattern: aRBLiteralValueNode value)
+	(StringInterpolationPlugin hasInterpolationPattern: aRBLiteralValueNode value)
 		ifFalse: [ ^ self ].
 	
 	interpolatedStringNode := 	RBInterpolatedStringNode

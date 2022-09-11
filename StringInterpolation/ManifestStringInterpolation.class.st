@@ -24,5 +24,5 @@ ManifestStringInterpolation class >> ruleLongMethodsRuleV1FalsePositive [
 
 { #category : #'code-critics' }
 ManifestStringInterpolation class >> ruleUtilityMethodsRuleV1FalsePositive [
-	^ #(#(#(#RGMethodDefinition #(#StringInterpolationPlugin #extractStatementsFrom: #false)) #'2022-09-06T22:09:38.759408-07:00') #(#(#RGMethodDefinition #(#StringInterpolationPlugin #hasInterpolationPattern: #false)) #'2022-09-06T22:09:52.075742-07:00') #(#(#RGMethodDefinition #(#StringInterpolationPlugin #nextNodeInStream:ofNode: #false)) #'2022-09-07T21:51:22.961634-07:00') )
+	^ #(#(#(#RGMethodDefinition #(#StringInterpolationPlugin #extractStatementsFrom: #false)) #'2022-09-06T22:09:38.759408-07:00') #(#(#RGMethodDefinition #(#StringInterpolationPlugin #nextNodeInStream:ofNode: #false)) #'2022-09-07T21:51:22.961634-07:00') )
 ]

@@ -28,9 +28,8 @@ StringInterpolationTest class >> recompileAllTestMethods [
 
 { #category : #tests }
 StringInterpolationTest >> testEscapedExpression [
-	self
-		assert: '1+2 is \\[1 + 2]'
-		equals: '1+2 is \' , '[1 + 2]'
+	self assert: '1+2 is \\[1 + 2]' equals: '1+2 is \\' , '[1 + 2]'.
+	self assert: '1+2 is \\\[1 + 2]' equals: '1+2 is \\\' , '[1 + 2]'
 ]
 
 { #category : #tests }
@@ -42,6 +41,25 @@ StringInterpolationTest >> testExpressionRaisingExceptionFailsAtRuntime [
 		on: Error
 		do: [ :error | ok := error messageText = 'example error' ].
 	self assert: ok equals: true
+]
+
+{ #category : #tests }
+StringInterpolationTest >> testHasInterpolationPatternInEscapedForm [
+	self deny:
+		(StringInterpolationPlugin hasInterpolationPattern:
+			 '1+2 is \\[1 + 2]').
+	self deny:
+		(StringInterpolationPlugin hasInterpolationPattern:
+			 '1+2 is \\\[1 + 2]').
+]
+
+{ #category : #tests }
+StringInterpolationTest >> testHasInterpolationPatternInUnescapedForm [
+	self
+		assert:
+		(StringInterpolationPlugin hasInterpolationPattern:
+			 '1+2 is \[1 + 2]')
+		equals: true
 ]
 
 { #category : #tests }

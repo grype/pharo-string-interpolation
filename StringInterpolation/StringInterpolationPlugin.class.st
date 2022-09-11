@@ -4,6 +4,19 @@ Class {
 	#category : #StringInterpolation
 }
 
+{ #category : #testing }
+StringInterpolationPlugin class >> hasInterpolationPattern: aString [ 
+	
+	"Any string with \[ and ] in it is considered interpolated"
+	"Unless the leading $\ is prefixed with another $\, in which case interpolation is ignored"
+	"'\[1+2]' has interpolation"
+	"'\\[1+2]' does not"
+	"'\\\\\\\\\[1+2]' does not"
+	"'\[1+2]\\[1=@]' does"
+	"In other words: it has to be a single $\ followed by $[ and eventually a $]"
+	^ aString matchesRegex: '^[^\\]*\\\[.*\].*$'
+]
+
 { #category : #api }
 StringInterpolationPlugin class >> interpolate: aString withAssociations: aCollection [
 	| sortedValues |
@@ -31,28 +44,20 @@ StringInterpolationPlugin class >> priority [
 
 { #category : #transforming }
 StringInterpolationPlugin >> expandStringLiteral: aRBLiteralValueNode [
-	| newMessageNode statements |
+	| statements newMessageNode |
 
-	(self hasInterpolationPattern: aRBLiteralValueNode value) ifFalse: [ 
+	(self class hasInterpolationPattern: aRBLiteralValueNode value) ifFalse: [ 
 		^ self ].
 
 	statements := self extractStatementsFrom: aRBLiteralValueNode.
-	newMessageNode := aRBLiteralValueNode.
-
-	statements
-		ifEmpty: [ 
-			newMessageNode := RBLiteralNode value: (aRBLiteralValueNode value
-					                   copyWithRegex: '\\\\\['
-					                   matchesReplacedWith: '\[') ]
-		ifNotEmpty: [ 
-			newMessageNode := RBMessageNode
-				                  receiver:
-				                  (RBVariableNode named: self class name)
-				                  selector: #interpolate:withAssociations:
-				                  arguments: { 
-						                  (RBLiteralValueNode value:
-							                   aRBLiteralValueNode value).
-						                  (RBArrayNode statements: statements) } ].
+	statements ifEmpty: [ ^ self ].
+	newMessageNode := RBMessageNode
+		                  receiver: (RBVariableNode named: self class name)
+		                  selector: #interpolate:withAssociations:
+		                  arguments: { 
+				                  (RBLiteralValueNode value:
+					                   aRBLiteralValueNode value).
+				                  (RBArrayNode statements: statements) }.
 	aRBLiteralValueNode replaceWith: newMessageNode
 ]
 
@@ -81,13 +86,6 @@ StringInterpolationPlugin >> extractStatementsFrom: aLiteralValueNode [
 						ifNotNil: [ :aNode | messages add: aNode ] ] ] ].
 
 	^ messages
-]
-
-{ #category : #testing }
-StringInterpolationPlugin >> hasInterpolationPattern: aString [ 
-	
-	"Any string with \[ and ] in it is a potential interpolation target"
-	^ aString matchesRegex: '^.*\\\[.*\].*$'
 ]
 
 { #category : #scanning }
